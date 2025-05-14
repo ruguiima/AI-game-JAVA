@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI智能助手</title>
+    <link rel="stylesheet" th:href="@{/font-awesome/6.4.0/css/all.min.css}">
+    <link th:href="@{/css.css}" rel="stylesheet"/>
+</head>
+<body>
+    <!-- 侧边历史记录面板 -->
+    <div class="history-panel" id="historyPanel">
+        <div class="history-header">
+            <h3>对话历史</h3>
+            <button class="toggle-history" id="toggleHistory">
+                <i class="fas fa-chevron-left"></i> 收起
+            </button>
+        </div>
+        <div class="history-list" id="historyList">
+            <div class="history-item active">
+                <div class="history-question">如何学习Vue.js？</div>
+                <div class="history-time">今天 10:30</div>
+            </div>
+            <div class="history-item">
+                <div class="history-question">JavaScript闭包是什么？</div>
+                <div class="history-time">昨天 15:45</div>
+            </div>
+            <div class="history-item">
+                <div class="history-question">CSS Grid布局教程</div>
+                <div class="history-time">昨天 09:20</div>
+            </div>
+            <div class="history-item">
+                <div class="history-question">React和Vue的区别</div>
+                <div class="history-time">2025/4/28</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-content">
+        <button class="expand-history-btn" id="expandHistoryBtn">
+            <i class="fas fa-history"></i>
+        </button>
+
+        <div class="header">
+            <h1><span style="cursor: pointer;">智能</span>AI助手</h1>
+            <p class="subtitle">随时为您解答各种问题</p>
+        </div>
+
+        <div class="chat-container" id="chatContainer">
+            <div th:each="message : ${messages}" 
+                 th:classappend="${message.sender} == 'ai' ? 'ai-message' : 'user-message'" 
+                 class="message">
+                <div th:if="${message.sender} == 'ai'" class="message-avatar ai-avatar">AI</div>
+                <div class="message-content">
+                    <div class="message-bubble" th:text="${message.content}"></div>
+                    <div class="message-time" th:text="${message.time}"></div>
+                </div>
+                <div th:if="${message.sender} == 'user'" class="message-avatar user-avatar">我</div>
+            </div>
+        </div>
+
+        <div class="input-container">
+            <form action="/chat" method="get" id="chatForm">
+                <div class="input-area">
+                    <textarea id="messageInput" name="userMessage" placeholder="输入您的问题..." rows="1"></textarea>
+                    <button class="send-button" type="submit" id="sendButton">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </form>
+            <div class="tool-buttons">
+                <div>
+                    <button class="tool-button"><i class="fas fa-microphone"></i> 语音</button>
+                    <button class="tool-button"><i class="fas fa-image"></i> 图片</button>
+                </div>
+                <button class="tool-button"><i class="fas fa-ellipsis-h"></i> 更多</button>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/js.js}"></script>
+</body>
+</html>
