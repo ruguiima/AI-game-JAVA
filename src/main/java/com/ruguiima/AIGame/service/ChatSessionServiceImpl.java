@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-import java.util.UUID;
 
 @Service
 public class ChatSessionServiceImpl implements ChatSessionService {

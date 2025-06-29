@@ -41,6 +41,12 @@
         <div class="header">
             <h1><span style="cursor: pointer;">智能</span>AI助手</h1>
             <p class="subtitle">随时为您解答各种问题</p>
+            <div style="position: absolute; top: 10px; right: 20px; display: flex; align-items: center;">
+                <span style="margin-right: 15px;" th:if="${user != null}" th:text="${'欢迎, ' + user.username}"></span>
+                <a href="/logout" style="color: var(--primary-color); text-decoration: none;">
+                    <i class="fas fa-sign-out-alt"></i> 退出
+                </a>
+            </div>
         </div>
 
         <div class="chat-container" id="chatContainer">
@@ -60,7 +66,7 @@
         </div>
 
         <div class="input-container" th:classappend="${messages.isEmpty()} ? 'empty' : ''">
-            <form action="/chat" method="get" id="chatForm">
+            <form action="/chat" method="post" id="chatForm">
                 <input type="hidden" name="sessionId" th:if="${currentSessionId != null}" th:value="${currentSessionId}" />
                 <div class="input-area">
                     <textarea id="messageInput" name="userMessage" placeholder="输入您的问题..." rows="1"></textarea>

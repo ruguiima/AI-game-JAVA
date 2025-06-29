@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
 
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jc</title>
+    <title>登录 - AI智能助手</title>
     <link rel="stylesheet" th:href="@{/font/css/login.min.css}">
     <link rel="stylesheet" th:href="@{/login.css}">
 </head>
@@ -20,52 +20,59 @@
         <div class="box login">
             <div class="form-content">
                 <div class="avtar">
-                    <div class="pic"><img src="./img/1.jpg" alt=""></div>
+                    <div class="pic"><img th:src="@{/img/1.jpg}" alt=""></div>
                 </div>
-                <h1>Welcome back</h1>
-                <form action="#" class="form">
+                <h1>欢迎回来</h1>
+                <form action="/login" method="post" class="form" th:object="${loginDTO}">
                     <div>
                         <i class="fa fa-user-o"></i>
-                        <input type="text" placeholder="username">
+                        <input type="text" placeholder="用户名" th:field="*{username}" required>
                     </div>
                     <div>
                         <i class="fa fa-key"></i>
-                        <input type="password" placeholder="password">
+                        <input type="password" placeholder="密码" th:field="*{password}" required>
                     </div>
                     <div class="btn">
-                        <button>login</button>
+                        <button type="submit">登录</button>
+                    </div>
+                    <div class="message-container" style="min-height: 30px; margin-top: 10px;">
+                        <div th:if="${loginError}" class="error-message" th:text="${loginError}" style="color: #ff3860; font-size: 0.85rem; text-align: center; padding: 5px;"></div>
                     </div>
                 </form>
                 <p class="btn-something">
-                    Don't have an account ? <span class="signupbtn">signup</span>
+                    还没有账号？ <span class="signupbtn">注册</span>
                 </p>
             </div>
         </div>
         <div class="box signup">
             <div class="form-content">
                 <div class="avtar">
-                    <div class="pic"><img src="./img/2.jpg" alt=""></div>
+                    <div class="pic"><img th:src="@{/img/2.jpg}" alt=""></div>
                 </div>
-                <h1>Let's get started</h1>
-                <form action="#" class="form">
+                <h1>开始使用</h1>
+                <form action="/register" method="post" class="form" th:object="${registrationDTO}">
                     <div>
                         <i class="fa fa-user-o"></i>
-                        <input type="text" placeholder="username">
+                        <input type="text" placeholder="用户名" th:field="*{username}" required>
                     </div>
                     <div>
                         <i class="fa fa-envelope-o"></i>
-                        <input type="email" placeholder="email">
+                        <input type="email" placeholder="电子邮箱" th:field="*{email}" required>
                     </div>
                     <div>
                         <i class="fa fa-key"></i>
-                        <input type="password" placeholder="password">
+                        <input type="password" placeholder="密码" th:field="*{password}" required>
                     </div>
                     <div class="btn">
-                        <button>signup</button>
+                        <button type="submit">注册</button>
+                    </div>
+                    <div class="message-container" style="min-height: 30px; margin-top: 10px;">
+                        <div th:if="${registrationSuccess}" class="success-message" th:text="${registrationSuccess}" style="color: #23d160; font-size: 0.85rem; text-align: center; padding: 5px;"></div>
+                        <div th:if="${registrationError}" class="error-message" th:text="${registrationError}" style="color: #ff3860; font-size: 0.85rem; text-align: center; padding: 5px;"></div>
                     </div>
                 </form>
                 <p class="btn-something">
-                    Already have an account ? <span class="loginbtn">login</span>
+                    已有账号？ <span class="loginbtn">登录</span>
                 </p>
             </div>
         </div>
