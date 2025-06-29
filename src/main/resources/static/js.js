@@ -16,6 +16,14 @@ function toggleHistory() {
     expandHistoryBtn.style.display = isHistoryCollapsed ? 'flex' : 'none';
 }
 
+// 页面加载时初始化按钮状态
+function initializeButtonState() {
+    // 检查侧边栏是否处于折叠状态
+    isHistoryCollapsed = historyPanel.classList.contains('collapsed');
+    // 设置展开按钮的显示状态
+    expandHistoryBtn.style.display = isHistoryCollapsed ? 'flex' : 'none';
+}
+
 // 绑定事件
 toggleHistoryBtn.addEventListener('click', toggleHistory);
 expandHistoryBtn.addEventListener('click', toggleHistory);
@@ -45,3 +53,6 @@ adjustTextareaHeight();
 
 // 初始滚动到底部
 scrollToBottom();
+
+// 初始化按钮状态
+initializeButtonState();

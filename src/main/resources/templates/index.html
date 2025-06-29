@@ -16,29 +16,25 @@
                 <i class="fas fa-chevron-left"></i> 收起
             </button>
         </div>
+        <div style="padding: 10px;">
+            <button onclick="window.location.href='/session/new'" style="width: 100%; padding: 8px; background-color: var(--primary-color); color: white; border: none; border-radius: 4px; cursor: pointer;">
+                <i class="fas fa-plus"></i> 新建对话
+            </button>
+        </div>
         <div class="history-list" id="historyList">
-            <div class="history-item active">
-                <div class="history-question">如何学习Vue.js？</div>
-                <div class="history-time">今天 10:30</div>
-            </div>
-            <div class="history-item">
-                <div class="history-question">JavaScript闭包是什么？</div>
-                <div class="history-time">昨天 15:45</div>
-            </div>
-            <div class="history-item">
-                <div class="history-question">CSS Grid布局教程</div>
-                <div class="history-time">昨天 09:20</div>
-            </div>
-            <div class="history-item">
-                <div class="history-question">React和Vue的区别</div>
-                <div class="history-time">2025/4/28</div>
+            <div th:each="chatSession : ${sessions}" 
+                 th:classappend="${chatSession.sessionId == currentSessionId} ? 'history-item active' : 'history-item'"
+                 th:attr="onclick='window.location.href=\'/session/\' + \'' + ${chatSession.sessionId} + '\''"
+                 style="cursor: pointer;">
+                <div class="history-question" th:text="${chatSession.sessionName}"></div>
+                <div class="history-time" th:text="${#temporals.format(chatSession.lastUpdatedTime, 'yyyy-MM-dd HH:mm')}"></div>
             </div>
         </div>
     </div>
 
     <!-- 主内容区域 -->
     <div class="main-content">
-        <button class="expand-history-btn" id="expandHistoryBtn">
+        <button class="expand-history-btn" id="expandHistoryBtn" style="display: none;">
             <i class="fas fa-history"></i>
         </button>
 
@@ -48,6 +44,9 @@
         </div>
 
         <div class="chat-container" id="chatContainer">
+            <div th:if="${messages.isEmpty()}" class="empty-chat-message">
+                您有什么问题？
+            </div>
             <div th:each="message : ${messages}" 
                  th:classappend="${message.sender} == 'ai' ? 'ai-message' : 'user-message'" 
                  class="message">
@@ -60,8 +59,9 @@
             </div>
         </div>
 
-        <div class="input-container">
+        <div class="input-container" th:classappend="${messages.isEmpty()} ? 'empty' : ''">
             <form action="/chat" method="get" id="chatForm">
+                <input type="hidden" name="sessionId" th:if="${currentSessionId != null}" th:value="${currentSessionId}" />
                 <div class="input-area">
                     <textarea id="messageInput" name="userMessage" placeholder="输入您的问题..." rows="1"></textarea>
                     <button class="send-button" type="submit" id="sendButton">
