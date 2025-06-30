@@ -6,6 +6,7 @@ import com.ruguiima.AIGame.model.entity.User;
 import com.ruguiima.AIGame.model.vo.StreamResponseVO;
 import com.ruguiima.AIGame.service.ChatSessionService;
 import com.ruguiima.AIGame.service.DeepSeekService;
+import com.ruguiima.AIGame.service.ModelSettings;
 import com.ruguiima.AIGame.service.SessionService;
 
 import jakarta.servlet.http.HttpSession;
@@ -179,8 +180,30 @@ public class ChatApiController {
                     }
                 };
                 
-                // 调用流式API
-                deepSeekService.createChatCompletionStream(session, userMessage, callback);
+                // 获取用户的模型设置
+                ModelSettings modelSettings;
+                try {
+                    // 获取用户设置，如果为null则使用默认值
+                    String model = currentUser.getPreferredModel() != null ? 
+                                  currentUser.getPreferredModel() : "deepseek-chat";
+                    Double temperature = currentUser.getTemperature() != null ? 
+                                        currentUser.getTemperature() : 0.2;
+                    Integer maxTokens = currentUser.getMaxTokens() != null ? 
+                                       currentUser.getMaxTokens() : 500;
+                    
+                    modelSettings = ModelSettings.builder()
+                            .model(model)
+                            .temperature(temperature)
+                            .maxTokens(maxTokens)
+                            .build();
+                } catch (Exception e) {
+                    // 如果获取用户设置失败，使用默认设置
+                    modelSettings = ModelSettings.defaultSettings();
+                    log.warn("获取用户模型设置失败，使用默认设置", e);
+                }
+                
+                // 调用流式API（使用用户的模型设置）
+                deepSeekService.createChatCompletionStream(session, userMessage, modelSettings, callback);
                 
             } catch (Exception e) {
                 try {

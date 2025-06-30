@@ -19,7 +19,6 @@ import com.ruguiima.AIGame.model.entity.Message;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -64,49 +63,16 @@ public class DeepSeekService {
      * @param userMessage 用户消息
      * @param callback 回调函数
      */
-    public void createChatCompletionStream(ChatSession session, String userMessage, StreamCallback callback) {
-        try {
-            // 准备消息列表
-            List<ChatMessage> messages = new ArrayList<>();
-            
-            // 添加系统消息
-            messages.add(new ChatMessage("system", config.getSystemMessage()));
-            
-            // 转换历史消息并添加到请求中，限制历史消息数量
-            List<Message> sessionMessages = session.getMessages();
-            int historySize = sessionMessages.size();
-            int startIdx = Math.max(0, historySize - config.getMaxMessages());
-            
-            // 如果有历史消息，添加到请求
-            if (historySize > 0) {
-                List<Message> recentMessages = sessionMessages.subList(startIdx, historySize);
-                
-                for (Message msg : recentMessages) {
-                    ChatMessage chatMsg = ChatMessage.fromMessage(msg);
-                    messages.add(chatMsg);
-                }
-            }
-            
-            // 如果最后一条不是用户的消息，添加当前用户消息
-            if (historySize == 0 || !sessionMessages.get(historySize-1).getRole().equals("user")) {
-                messages.add(new ChatMessage("user", userMessage));
-            }
-            
-            // 调用流式API
-            createChatCompletionStream(messages, callback);
-            
-        } catch (Exception e) {
-            log.error("准备流式响应请求时出错", e);
-            callback.onError(e);
-        }
-    }
     
     /**
-     * 调用DeepSeek的聊天接口 - 流式输出
+     * 调用DeepSeek的聊天接口 - 流式输出（支持自定义模型设置）
      * @param messages 消息列表
+     * @param modelSettings 模型设置
      * @param callback 回调函数
      */
-    public void createChatCompletionStream(List<ChatMessage> messages, StreamCallback callback) {
+    public void createChatCompletionStream(List<ChatMessage> messages, 
+                                         ModelSettings modelSettings, 
+                                         StreamCallback callback) {
         try {
             String url = config.getBaseUrl() + "/v1/chat/completions";
             
@@ -117,16 +83,18 @@ public class DeepSeekService {
             
             // 创建请求体
             ObjectNode requestBody = objectMapper.createObjectNode();
-            requestBody.put("model", config.getModel());
-            requestBody.put("temperature", config.getTemperature());
-            requestBody.put("max_tokens", config.getMaxTokens());
+            requestBody.put("model", modelSettings.getModel());
+            requestBody.put("temperature", modelSettings.getTemperature());
+            requestBody.put("max_tokens", modelSettings.getMaxTokens());
             requestBody.put("stream", true);  // 启用流式输出
             
             // 添加消息
             ArrayNode messagesArray = requestBody.putArray("messages");
             for (ChatMessage message : messages) {
                 ObjectNode messageObject = messagesArray.addObject();
-                messageObject.put("role", message.getRole());
+                // 映射角色：ai -> assistant，其他保持不变
+                String role = "ai".equals(message.getRole()) ? "assistant" : message.getRole();
+                messageObject.put("role", role);
                 messageObject.put("content", message.getContent());
             }
             
@@ -157,12 +125,25 @@ public class DeepSeekService {
                                     JsonNode choices = chunk.path("choices");
                                     
                                     if (choices.isArray() && choices.size() > 0) {
-                                        JsonNode delta = choices.get(0).path("delta");
+                                        JsonNode choice = choices.get(0);
+                                        JsonNode delta = choice.path("delta");
+                                        
+                                        // 处理标准内容
                                         if (delta.has("content")) {
                                             String content = delta.path("content").asText();
-                                            if (content != null && !content.isEmpty()) {
+                                            if (content != null && !content.isEmpty() && !"null".equals(content)) {
                                                 callback.onToken(content);
                                                 fullResponse.append(content);
+                                            }
+                                        }
+                                        
+                                        // 处理reasoning内容（deepseek-reasoner模型专用）
+                                        if (delta.has("reasoning")) {
+                                            String reasoning = delta.path("reasoning").asText();
+                                            // 跳过推理内容，不显示给用户
+                                            // 可以在这里记录日志，但不传递给前端
+                                            if (reasoning != null && !reasoning.isEmpty() && !"null".equals(reasoning)) {
+                                                log.debug("推理内容: {}", reasoning);
                                             }
                                         }
                                     }
@@ -171,19 +152,63 @@ public class DeepSeekService {
                                 }
                             }
                         }
-                    } catch (IOException e) {
+                        
+                        // 调用完成回调
+                        callback.onComplete(fullResponse.toString());
+                    } catch (Exception e) {
+                        log.error("处理流式响应出错", e);
                         callback.onError(e);
                     }
-                    
-                    // 响应完成
-                    String finalResponse = fullResponse.toString();
-                    callback.onComplete(finalResponse);
                     return null;
                 }
             );
         } catch (Exception e) {
-            log.error("调用DeepSeek API流式输出出错", e);
+            log.error("调用DeepSeek API出错", e);
             callback.onError(e);
         }
     }
+
+    /**
+     * 调用DeepSeek的聊天接口 - 流式输出（支持自定义模型设置）
+     * @param session 聊天会话
+     * @param userMessage 用户消息
+     * @param modelSettings 模型设置
+     * @param callback 回调函数
+     */
+    public void createChatCompletionStream(ChatSession session, String userMessage, 
+                                         ModelSettings modelSettings, StreamCallback callback) {
+        try {
+            // 准备消息列表
+            List<ChatMessage> messages = new ArrayList<>();
+            
+            // 添加系统消息
+            messages.add(new ChatMessage("system", config.getSystemMessage()));
+            
+            // 转换历史消息并添加到请求中，限制历史消息数量
+            List<Message> sessionMessages = session.getMessages();
+            int historySize = sessionMessages.size();
+            int startIdx = Math.max(0, historySize - config.getMaxMessages());
+            
+            // 如果有历史消息，添加到请求
+            for (int i = startIdx; i < historySize; i++) {
+                Message msg = sessionMessages.get(i);
+                // 映射角色：ai -> assistant，其他保持不变
+                String role = "ai".equals(msg.getRole()) ? "assistant" : msg.getRole();
+                messages.add(new ChatMessage(role, msg.getContent()));
+            }
+            
+            // 添加当前用户消息
+            messages.add(new ChatMessage("user", userMessage));
+            
+            // 调用API
+            createChatCompletionStream(messages, modelSettings, callback);
+        } catch (Exception e) {
+            log.error("处理聊天请求时出错", e);
+            callback.onError(e);
+        }
+    }
+
+    /**
+     * 设置模型参数
+     */
 }

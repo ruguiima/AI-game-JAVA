@@ -60,5 +60,5 @@ deepseek:
   max-messages: 10  # 保留最近10条消息以避免token过大
   system-message: "You are a helpful assistant. Please respond in plain text without using any Markdown formatting. Do not use asterisks (*), underscores (_), backticks (`), hash symbols (#), or any other Markdown syntax. Provide clear, direct answers in regular plain text format."
   stream: true       # 启用流式输出
-  temperature: 0.7   # 温度参数, 越高回复越随机
-  max-tokens: 2000   # 每次生成的最大token数
+  temperature: 0.2   # 温度参数，与用户默认设置保持一致
+  max-tokens: 500    # 每次生成的最大token数，与用户默认设置保持一致

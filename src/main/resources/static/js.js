@@ -65,11 +65,15 @@ document.addEventListener('DOMContentLoaded', function() {
         
         messageDiv.innerHTML = `
             <div class="message-content">
-                <div class="message-bubble">${content}</div>
+                <div class="message-bubble"></div>
                 <div class="message-time">${getCurrentTime()}</div>
             </div>
             <div class="message-avatar user-avatar">我</div>
         `;
+        
+        // 安全地设置消息内容
+        const messageBubble = messageDiv.querySelector('.message-bubble');
+        messageBubble.textContent = content;
         
         chatContainer.appendChild(messageDiv);
         scrollToBottom();
@@ -96,10 +100,14 @@ document.addEventListener('DOMContentLoaded', function() {
         messageDiv.innerHTML = `
             <div class="message-avatar ai-avatar">AI</div>
             <div class="message-content">
-                <div class="message-bubble">${content}</div>
+                <div class="message-bubble"></div>
                 <div class="message-time">${getCurrentTime()}</div>
             </div>
         `;
+        
+        // 安全地设置消息内容
+        const messageBubble = messageDiv.querySelector('.message-bubble');
+        messageBubble.textContent = content;
         
         chatContainer.appendChild(messageDiv);
         scrollToBottom();
@@ -148,7 +156,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // 准备请求数据
         const requestData = {
             sessionId: currentSessionId,
-            message: message
+            message: message,
+            modelSettings: currentModelSettings // 包含模型设置
         };
         
         // 发送请求 - 使用EventSource处理SSE
@@ -245,8 +254,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                     
                                     // 如果有token，更新显示
                                     if (data.token !== undefined) {
-                                        fullResponse += data.token;
-                                        updateAiMessage(currentAiMessage, fullResponse);
+                                        // 过滤null字符串和空字符串
+                                        if (data.token !== null && data.token !== "null" && data.token.trim() !== "") {
+                                            fullResponse += data.token;
+                                            updateAiMessage(currentAiMessage, fullResponse);
+                                        }
                                     }
                                     
                                     // 处理结束信号
@@ -340,9 +352,13 @@ document.addEventListener('DOMContentLoaded', function() {
                           String(now.getMinutes()).padStart(2, '0');
         
         historyItem.innerHTML = `
-            <div class="history-question">${sessionName}</div>
+            <div class="history-question"></div>
             <div class="history-time">${timeString}</div>
         `;
+        
+        // 安全地设置会话名称
+        const questionDiv = historyItem.querySelector('.history-question');
+        questionDiv.textContent = sessionName;
         
         // 移除其他项的活动状态
         const allItems = historyList.querySelectorAll('.history-item');
@@ -703,4 +719,334 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+    
+    // 模型设置面板控制
+    const moreSettingsBtn = document.getElementById('moreSettingsBtn');
+    const modelSettingsPanel = document.getElementById('modelSettingsPanel');
+    const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+    const applySettingsBtn = document.getElementById('applySettingsBtn');
+    const resetSettingsBtn = document.getElementById('resetSettingsBtn');
+    const settingsPreview = document.getElementById('settingsPreview');
+    
+    // 当前模型设置
+    let currentModelSettings = {
+        model: 'deepseek-chat',
+        maxTokens: 500,
+        temperature: 0.2,
+        responseLength: 'short',
+        creativity: 'precise'
+    };
+    
+    // 从后端加载用户模型设置
+    async function loadUserModelSettings() {
+        try {
+            const response = await fetch('/api/model-settings');
+            if (response.ok) {
+                const settings = await response.json();
+                
+                // 更新全局设置
+                currentModelSettings = settings;
+                
+                // 更新UI
+                updateSettingsUI(settings);
+                
+                // 更新预览
+                updateSettingsPreview();
+                
+                console.log('加载的用户设置:', settings);
+            } else {
+                console.log('加载用户设置失败，使用默认设置');
+                // 使用默认设置
+                loadDefaultSettings();
+            }
+        } catch (error) {
+            console.error('加载用户设置出错:', error);
+            // 使用默认设置
+            loadDefaultSettings();
+        }
+    }
+    
+    // 更新设置UI
+    function updateSettingsUI(settings) {
+        // 更新模型选择
+        const modelSelect = document.getElementById('modelSelect');
+        if (modelSelect && settings.model) {
+            modelSelect.value = settings.model;
+        }
+        
+        // 更新回复长度
+        const responseLengthRadios = document.querySelectorAll('input[name="responseLength"]');
+        responseLengthRadios.forEach(radio => {
+            radio.checked = radio.value === settings.responseLength;
+        });
+        
+        // 更新创意倾向
+        const creativityRadios = document.querySelectorAll('input[name="creativity"]');
+        creativityRadios.forEach(radio => {
+            radio.checked = radio.value === settings.creativity;
+        });
+    }
+    
+    // 加载默认设置
+    function loadDefaultSettings() {
+        const defaultSettings = {
+            model: 'deepseek-chat',
+            responseLength: 'short',
+            creativity: 'precise',
+            maxTokens: 500,
+            temperature: 0.2
+        };
+        
+        currentModelSettings = defaultSettings;
+        updateSettingsUI(defaultSettings);
+        updateSettingsPreview();
+    }
+    
+    if (moreSettingsBtn && modelSettingsPanel) {
+        console.log('模型设置按钮和面板都找到了');
+        
+        // 显示/隐藏设置面板
+        moreSettingsBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            console.log('更多按钮被点击');
+            
+            const isVisible = modelSettingsPanel.classList.contains('show');
+            console.log('当前面板是否显示:', isVisible);
+            
+            if (isVisible) {
+                hideModelSettings();
+            } else {
+                showModelSettings();
+            }
+        });
+        
+        // 关闭按钮
+        if (closeSettingsBtn) {
+            closeSettingsBtn.addEventListener('click', hideModelSettings);
+        }
+        
+        // 点击面板外部关闭
+        document.addEventListener('click', function(e) {
+            if (!modelSettingsPanel.contains(e.target) && !moreSettingsBtn.contains(e.target)) {
+                hideModelSettings();
+            }
+        });
+        
+        // 防止面板内部点击关闭
+        modelSettingsPanel.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+        
+        // ESC键关闭
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && modelSettingsPanel.classList.contains('show')) {
+                hideModelSettings();
+            }
+        });
+    }
+    
+    // 显示模型设置面板
+    function showModelSettings() {
+        console.log('显示模型设置面板');
+        modelSettingsPanel.classList.add('show');
+        console.log('面板类名:', modelSettingsPanel.className);
+        updateSettingsPreview();
+    }
+    
+    // 隐藏模型设置面板
+    function hideModelSettings() {
+        console.log('隐藏模型设置面板');
+        modelSettingsPanel.classList.remove('show');
+        console.log('面板类名:', modelSettingsPanel.className);
+    }
+    
+    // 更新设置预览
+    function updateSettingsPreview() {
+        const modelSelect = document.getElementById('modelSelect');
+        const responseLengthRadios = document.querySelectorAll('input[name="responseLength"]');
+        const creativityRadios = document.querySelectorAll('input[name="creativity"]');
+        
+        const modelText = modelSelect ? modelSelect.options[modelSelect.selectedIndex].text : 'DeepSeek Chat';
+        
+        let lengthText = '简短回复';
+        responseLengthRadios.forEach(radio => {
+            if (radio.checked) {
+                switch(radio.value) {
+                    case 'short': lengthText = '简短回复'; break;
+                    case 'medium': lengthText = '中等回复'; break;
+                    case 'long': lengthText = '复杂回复'; break;
+                }
+            }
+        });
+        
+        let creativityText = '规则模式';
+        creativityRadios.forEach(radio => {
+            if (radio.checked) {
+                switch(radio.value) {
+                    case 'precise': creativityText = '规则模式'; break;
+                    case 'balanced': creativityText = '平衡模式'; break;
+                    case 'creative': creativityText = '创造模式'; break;
+                }
+            }
+        });
+        
+        if (settingsPreview) {
+            settingsPreview.textContent = `${modelText} | ${lengthText} | ${creativityText}`;
+        }
+    }
+    
+    // 监听设置变化
+    document.addEventListener('change', function(e) {
+        if (e.target.matches('#modelSelect, input[name="responseLength"], input[name="creativity"]')) {
+            updateSettingsPreview();
+        }
+    });
+    
+    // 应用设置
+    if (applySettingsBtn) {
+        applySettingsBtn.addEventListener('click', async function() {
+            const originalText = applySettingsBtn.textContent;
+            applySettingsBtn.textContent = '保存中...';
+            applySettingsBtn.disabled = true;
+            
+            try {
+                // 获取当前设置值
+                const modelSelect = document.getElementById('modelSelect');
+                const responseLengthRadios = document.querySelectorAll('input[name="responseLength"]');
+                const creativityRadios = document.querySelectorAll('input[name="creativity"]');
+                
+                let responseLength = 'short';
+                responseLengthRadios.forEach(radio => {
+                    if (radio.checked) {
+                        responseLength = radio.value;
+                    }
+                });
+                
+                let creativity = 'precise';
+                creativityRadios.forEach(radio => {
+                    if (radio.checked) {
+                        creativity = radio.value;
+                    }
+                });
+                
+                // 构建请求数据
+                const settingsData = {
+                    model: modelSelect ? modelSelect.value : 'deepseek-chat',
+                    responseLength: responseLength,
+                    creativity: creativity
+                };
+                
+                // 发送到后端
+                const response = await fetch('/api/model-settings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(settingsData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    // 更新本地设置
+                    currentModelSettings = result.settings;
+                    
+                    // 保存到本地存储作为备份
+                    localStorage.setItem('modelSettings', JSON.stringify(currentModelSettings));
+                    
+                    // 显示成功提示
+                    showNotification('模型设置已保存', 'success');
+                    
+                    // 关闭面板
+                    hideModelSettings();
+                    
+                    console.log('应用的模型设置:', currentModelSettings);
+                } else {
+                    showNotification(result.error || '保存失败', 'error');
+                }
+            } catch (error) {
+                console.error('保存设置失败:', error);
+                showNotification('保存失败，请重试', 'error');
+            } finally {
+                applySettingsBtn.textContent = originalText;
+                applySettingsBtn.disabled = false;
+            }
+        });
+    }
+    
+    // 重置设置
+    if (resetSettingsBtn) {
+        resetSettingsBtn.addEventListener('click', function() {
+            // 重置到默认设置
+            const modelSelect = document.getElementById('modelSelect');
+            const responseLengthRadios = document.querySelectorAll('input[name="responseLength"]');
+            const creativityRadios = document.querySelectorAll('input[name="creativity"]');
+            
+            if (modelSelect) {
+                modelSelect.value = 'deepseek-chat';
+            }
+            
+            responseLengthRadios.forEach(radio => {
+                radio.checked = radio.value === 'short';
+            });
+            
+            creativityRadios.forEach(radio => {
+                radio.checked = radio.value === 'precise';
+            });
+            
+            // 重置当前设置
+            currentModelSettings = {
+                model: 'deepseek-chat',
+                maxTokens: 500,
+                temperature: 0.2,
+                responseLength: 'short',
+                creativity: 'precise'
+            };
+            
+            // 清除本地存储
+            localStorage.removeItem('modelSettings');
+            
+            // 更新预览
+            updateSettingsPreview();
+            
+            showNotification('设置已重置为默认值', 'info');
+        });
+    }
+    
+    // 页面加载时恢复保存的设置
+    function loadSavedSettings() {
+        const savedSettings = localStorage.getItem('modelSettings');
+        if (savedSettings) {
+            try {
+                const settings = JSON.parse(savedSettings);
+                currentModelSettings = { ...currentModelSettings, ...settings };
+                
+                // 应用到界面
+                const modelSelect = document.getElementById('modelSelect');
+                if (modelSelect && settings.model) {
+                    modelSelect.value = settings.model;
+                }
+                
+                const responseLengthRadios = document.querySelectorAll('input[name="responseLength"]');
+                responseLengthRadios.forEach(radio => {
+                    radio.checked = radio.value === settings.responseLength;
+                });
+                
+                const creativityRadios = document.querySelectorAll('input[name="creativity"]');
+                creativityRadios.forEach(radio => {
+                    radio.checked = radio.value === settings.creativity;
+                });
+                
+                updateSettingsPreview();
+            } catch (e) {
+                console.error('加载保存的设置失败:', e);
+            }
+        }
+    }
+    
+    // 初始化时加载保存的设置
+    loadSavedSettings();
+    
+    // 用户模型设置
+    loadUserModelSettings();
 });

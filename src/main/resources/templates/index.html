@@ -138,11 +138,99 @@
                 </div>
             </form>
             <div class="tool-buttons">
-                <div>
-                    <button class="tool-button"><i class="fas fa-microphone"></i> 语音</button>
-                    <button class="tool-button"><i class="fas fa-image"></i> 图片</button>
+                <button class="tool-button" id="moreSettingsBtn"><i class="fas fa-ellipsis-h"></i> 更多</button>
+            </div>
+            
+            <!-- 模型设置面板 -->
+            <div class="model-settings-panel" id="modelSettingsPanel">
+                <div class="settings-header">
+                    <h4><i class="fas fa-cog"></i> 模型设置</h4>
+                    <button class="close-settings-btn" id="closeSettingsBtn">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
-                <button class="tool-button"><i class="fas fa-ellipsis-h"></i> 更多</button>
+                
+                <div class="settings-content">
+                    <!-- 模型选择 -->
+                    <div class="setting-group">
+                        <label class="setting-label">
+                            <i class="fas fa-brain"></i> 模型类型
+                        </label>
+                        <select class="setting-select" id="modelSelect">
+                            <option value="deepseek-chat">DeepSeek Chat (标准)</option>
+                            <option value="deepseek-reasoner">DeepSeek Reasoner (深度思考)</option>
+                        </select>
+                        <div class="setting-description">
+                            深度思考模式提供更详细的分析过程，但响应时间较长
+                        </div>
+                    </div>
+                    
+                    <!-- 回复长度 -->
+                    <div class="setting-group">
+                        <label class="setting-label">
+                            <i class="fas fa-align-left"></i> 回复长度
+                        </label>
+                        <div class="setting-options">
+                            <label class="option-radio">
+                                <input type="radio" name="responseLength" value="short" checked>
+                                <span class="radio-custom"></span>
+                                简短 (500 tokens)
+                            </label>
+                            <label class="option-radio">
+                                <input type="radio" name="responseLength" value="medium">
+                                <span class="radio-custom"></span>
+                                中等 (1000 tokens)
+                            </label>
+                            <label class="option-radio">
+                                <input type="radio" name="responseLength" value="long">
+                                <span class="radio-custom"></span>
+                                复杂 (2000 tokens)
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- 创意倾向 -->
+                    <div class="setting-group">
+                        <label class="setting-label">
+                            <i class="fas fa-palette"></i> 创意倾向
+                        </label>
+                        <div class="setting-options">
+                            <label class="option-radio">
+                                <input type="radio" name="creativity" value="precise" checked>
+                                <span class="radio-custom"></span>
+                                规则 (温度 0.2)
+                            </label>
+                            <label class="option-radio">
+                                <input type="radio" name="creativity" value="balanced">
+                                <span class="radio-custom"></span>
+                                平衡 (温度 0.5)
+                            </label>
+                            <label class="option-radio">
+                                <input type="radio" name="creativity" value="creative">
+                                <span class="radio-custom"></span>
+                                创造 (温度 0.8)
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- 设置预览 -->
+                    <div class="setting-preview">
+                        <div class="preview-label">当前配置：</div>
+                        <div class="preview-content" id="settingsPreview">
+                            DeepSeek Chat | 简短回复 | 规则模式
+                        </div>
+                    </div>
+                    
+                    <!-- 应用按钮 -->
+                    <div class="settings-actions">
+                        <button class="apply-settings-btn" id="applySettingsBtn">
+                            <i class="fas fa-check"></i> 应用设置
+                        </button>
+                        <button class="reset-settings-btn" id="resetSettingsBtn">
+                            <i class="fas fa-undo"></i> 重置默认
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

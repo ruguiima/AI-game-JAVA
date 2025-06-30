@@ -184,6 +184,7 @@
      position: relative;
      word-break: break-word;
      box-shadow: var(--shadow);
+     white-space: pre-wrap; /* 保留换行符和空格 */
  }
  
  .user-message {
@@ -254,6 +255,7 @@
      padding: 16px;
      background: white;
      border-top: 1px solid #e0e0e0;
+     position: relative; /* 为模型设置面板提供定位基准 */
  }
  
  /* 空对话时调整 input-container 样式 */
@@ -322,7 +324,7 @@
  /* 工具按钮 */
  .tool-buttons {
      display: flex;
-     justify-content: space-between;
+     justify-content: flex-end;
      margin-top: 8px;
  }
  
@@ -686,4 +688,234 @@
 
 .notification-close:hover {
     opacity: 1;
+}
+
+/* 模型设置面板样式 */
+.model-settings-panel {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 500px;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    max-height: 70vh;
+    overflow-y: auto;
+    display: none;
+    z-index: 2000; /* 提高z-index确保显示在最上层 */
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.model-settings-panel.show {
+    display: block;
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.settings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #e0e0e0;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 12px 12px 0 0;
+}
+
+.settings-header h4 {
+    margin: 0;
+    color: var(--primary-color);
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.settings-header h4 i {
+    margin-right: 8px;
+    color: var(--primary-color);
+}
+
+.close-settings-btn {
+    background: none;
+    border: none;
+    color: #666;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.close-settings-btn:hover {
+    background: rgba(0, 0, 0, 0.1);
+    color: #333;
+}
+
+.settings-content {
+    padding: 20px;
+}
+
+.setting-group {
+    margin-bottom: 25px;
+}
+
+.setting-group:last-child {
+    margin-bottom: 0;
+}
+
+.setting-label {
+    display: block;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.setting-label i {
+    margin-right: 8px;
+    color: var(--primary-color);
+    width: 16px;
+}
+
+.setting-select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    background: white;
+    color: #333;
+    transition: border-color 0.2s ease;
+}
+
+.setting-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(100, 26, 207, 0.1);
+}
+
+.setting-description {
+    font-size: 12px;
+    color: #666;
+    margin-top: 5px;
+    line-height: 1.4;
+}
+
+.setting-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.option-radio {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+    font-size: 14px;
+}
+
+.option-radio:hover {
+    background: rgba(100, 26, 207, 0.05);
+}
+
+.option-radio input[type="radio"] {
+    display: none;
+}
+
+.radio-custom {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #ddd;
+    border-radius: 50%;
+    margin-right: 10px;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.option-radio input[type="radio"]:checked + .radio-custom {
+    border-color: var(--primary-color);
+    background: var(--primary-color);
+}
+
+.option-radio input[type="radio"]:checked + .radio-custom::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 6px;
+    height: 6px;
+    background: white;
+    border-radius: 50%;
+}
+
+.setting-preview {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 15px;
+    border-radius: 8px;
+    margin: 20px 0;
+    border: 1px solid #e0e0e0;
+}
+
+.preview-label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+.preview-content {
+    color: var(--primary-color);
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.settings-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.apply-settings-btn,
+.reset-settings-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.apply-settings-btn {
+    background: var(--primary-color);
+    color: white;
+}
+
+.apply-settings-btn:hover {
+    background: #5a17b8;
+    transform: translateY(-1px);
+}
+
+.reset-settings-btn {
+    background: #f8f9fa;
+    color: #666;
+    border: 1px solid #ddd;
+}
+
+.reset-settings-btn:hover {
+    background: #e9ecef;
+    color: #333;
 }
