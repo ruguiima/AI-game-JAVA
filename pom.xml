@@ -12,7 +12,7 @@
 	<artifactId>AI-game-JAVA</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>AI-game</name>
-	<description>AI聊天游戏项目</description>
+	<description>AI聊天应用</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -104,6 +104,7 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
+				    <mainClass>com.ruguiima.nexus.DemoApplication</mainClass>
 					<excludes>
 						<exclude>
 							<groupId>org.projectlombok</groupId>
