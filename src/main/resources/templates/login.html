@@ -50,25 +50,24 @@
                     <div class="pic"><img th:src="@{/img/2.jpg}" alt=""></div>
                 </div>
                 <h1>开始使用</h1>
-                <form action="/register" method="post" class="form" th:object="${registrationDTO}">
+                <form class="form">
                     <div>
                         <i class="fa fa-user-o"></i>
-                        <input type="text" placeholder="用户名" th:field="*{username}" required>
+                        <input type="text" name="username" placeholder="用户名" required>
                     </div>
                     <div>
                         <i class="fa fa-envelope-o"></i>
-                        <input type="email" placeholder="电子邮箱" th:field="*{email}" required>
+                        <input type="email" name="email" placeholder="电子邮箱" required>
                     </div>
                     <div>
                         <i class="fa fa-key"></i>
-                        <input type="password" placeholder="密码" th:field="*{password}" required>
+                        <input type="password" name="password" placeholder="密码" required>
                     </div>
                     <div class="btn">
                         <button type="submit">注册</button>
                     </div>
                     <div class="message-container" style="min-height: 30px; margin-top: 10px;">
-                        <div th:if="${registrationSuccess}" class="success-message" th:text="${registrationSuccess}" style="color: #23d160; font-size: 0.85rem; text-align: center; padding: 5px;"></div>
-                        <div th:if="${registrationError}" class="error-message" th:text="${registrationError}" style="color: #ff3860; font-size: 0.85rem; text-align: center; padding: 5px;"></div>
+                        <!-- 消息将通过JavaScript动态添加 -->
                     </div>
                 </form>
                 <p class="btn-something">
@@ -90,16 +89,14 @@
     siginupbtn.addEventListener("click", () => {
         login.style.transform = "rotateY(180deg)"
         signup.style.transform = "rotateY(0deg)";
-
         user.innerHTML = "create account"
     })
 
     loginbtn.addEventListener("click", () => {
         login.style.transform = "rotateY(0deg)"
         signup.style.transform = "rotateY(-180deg)";
-
         user.innerHTML = "account login"
     })
 </script>
-
+<script th:src="@{/auth.js}"></script>
 </html>
