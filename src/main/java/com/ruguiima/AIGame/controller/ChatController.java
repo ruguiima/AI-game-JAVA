@@ -37,14 +37,14 @@ public class ChatController {
         }
         
         User currentUser = sessionService.getCurrentUser(session);
-        ChatSession currentSession = chatSessionService.getCurrentSession();
+        ChatSession currentSession = chatSessionService.getCurrentSession(currentUser);
         List<MessageVO> messages = chatSessionService.convertToMessageVOList(currentSession);
         
         // 获取会话ID，如果是临时会话则为null
         String sessionId = currentSession.getMessages().isEmpty() ? null : currentSession.getSessionId();
         
         model.addAttribute("messages", messages);
-        model.addAttribute("sessions", chatSessionService.getAllSessions());
+        model.addAttribute("sessions", chatSessionService.getUserSessions(currentUser));
         model.addAttribute("currentSessionId", sessionId);
         model.addAttribute("user", currentUser); // 添加当前用户信息
         return "index";
@@ -59,28 +59,45 @@ public class ChatController {
         if (!sessionService.isLoggedIn(httpSession)) {
             return "redirect:/login";
         }
-        // 获取或创建会话
+        
+        // 获取当前登录用户
+        User currentUser = sessionService.getCurrentUser(httpSession);
         ChatSession session;
         
         // 使用临时会话或根据ID获取会话
         if (sessionId == null || sessionId.isEmpty()) {
-            // 添加用户消息到当前会话或临时会话
-            session = chatSessionService.addMessage(null, "user", userMessage);
+            // 添加用户消息到临时会话或创建新临时会话
+            session = chatSessionService.addMessage(null, "user", userMessage, currentUser);
         } else {
             // 添加用户消息到指定ID的会话
             session = chatSessionService.getSession(sessionId);
             if (session != null) {
                 // 添加消息到已存在的会话
-                chatSessionService.addMessage(sessionId, "user", userMessage);
+                if (session.getUser() != null && session.getUser().getId().equals(currentUser.getId())) {
+                    // 用户自己的会话
+                    session = chatSessionService.addMessage(sessionId, "user", userMessage, currentUser);
+                } else if (session.getUser() == null) {
+                    // 临时会话（理论上不会出现这种情况，因为所有会话都应该有用户关联）
+                    session = chatSessionService.addMessage(sessionId, "user", userMessage);
+                } else {
+                    // 不是当前用户的会话，创建新临时会话
+                    session = chatSessionService.addMessage(null, "user", userMessage, currentUser);
+                }
             } else {
-                // 会话ID无效，使用临时会话
-                session = chatSessionService.addMessage(null, "user", userMessage);
+                // 会话ID无效，使用当前用户创建新临时会话
+                session = chatSessionService.addMessage(null, "user", userMessage, currentUser);
             }
         }
 
         // 获取AI回复
         String reply = chatService.getMessage(userMessage);
-        chatSessionService.addMessage(session.getSessionId(), "ai", reply);
+        
+        // 将AI回复添加到会话
+        if (session.getUser() != null) {
+            chatSessionService.addMessage(session.getSessionId(), "ai", reply, currentUser);
+        } else {
+            chatSessionService.addMessage(session.getSessionId(), "ai", reply);
+        }
         
         // 重定向到会话页面，避免刷新页面时重复提交表单
         return "redirect:/session/" + session.getSessionId();
@@ -92,15 +109,19 @@ public class ChatController {
         if (!sessionService.isLoggedIn(httpSession)) {
             return "redirect:/login";
         }
-        ChatSession session = chatSessionService.setCurrentSession(sessionId);
+        
+        User currentUser = sessionService.getCurrentUser(httpSession);
+        ChatSession session = chatSessionService.setCurrentSession(sessionId, currentUser);
+        
         if (session == null) {
-            session = chatSessionService.getCurrentSession();
+            session = chatSessionService.getCurrentSession(currentUser);
         }
         
         // 将消息列表和会话信息传递给前端
         model.addAttribute("messages", chatSessionService.convertToMessageVOList(session));
-        model.addAttribute("sessions", chatSessionService.getAllSessions());
+        model.addAttribute("sessions", chatSessionService.getUserSessions(currentUser));
         model.addAttribute("currentSessionId", session.getSessionId());
+        model.addAttribute("user", currentUser);
         
         return "index";
     }
@@ -111,12 +132,18 @@ public class ChatController {
         if (!sessionService.isLoggedIn(httpSession)) {
             return "redirect:/login";
         }
-        // 创建新的临时会话（不会添加到历史记录中，直到用户发送第一条消息）
-        chatSessionService.createSession("新对话");
+        
+        User currentUser = sessionService.getCurrentUser(httpSession);
+        
+        // 创建临时会话（不保存到数据库，只有用户发送消息后才保存）
+        ChatSession tempSession = new ChatSession("新对话");
+        tempSession.setUser(currentUser); // 设置用户，但不保存到数据库
+        chatSessionService.setTempSession(tempSession); // 设置为当前临时会话
         
         model.addAttribute("messages", new ArrayList<>()); // 空消息列表
-        model.addAttribute("sessions", chatSessionService.getAllSessions());
-        model.addAttribute("currentSessionId", null); // 临时会话没有ID
+        model.addAttribute("sessions", chatSessionService.getUserSessions(currentUser));
+        model.addAttribute("currentSessionId", null); // 临时会话没有ID传递给前端
+        model.addAttribute("user", currentUser);
         
         return "index";
     }

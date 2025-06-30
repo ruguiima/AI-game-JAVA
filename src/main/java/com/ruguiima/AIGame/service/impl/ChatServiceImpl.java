@@ -1,6 +1,8 @@
-package com.ruguiima.AIGame.service;
+package com.ruguiima.AIGame.service.impl;
 
 import org.springframework.stereotype.Service;
+
+import com.ruguiima.AIGame.service.ChatService;
 
 @Service
 public class ChatServiceImpl implements ChatService {
