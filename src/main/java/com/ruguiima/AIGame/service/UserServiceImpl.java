@@ -1,8 +1,8 @@
-package com.ruguiima.AIGame.service.impl;
+package com.ruguiima.AIGame.service;
 
 import com.ruguiima.AIGame.model.entity.User;
 import com.ruguiima.AIGame.repository.UserRepository;
-import com.ruguiima.AIGame.service.UserService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

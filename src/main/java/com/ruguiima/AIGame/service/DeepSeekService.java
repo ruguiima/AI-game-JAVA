@@ -1,10 +1,8 @@
-package com.ruguiima.AIGame.service.impl;
+package com.ruguiima.AIGame.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -59,54 +57,6 @@ public class DeepSeekService {
     
     @Autowired
     private ObjectMapper objectMapper;
-    
-    /**
-     * 调用DeepSeek的聊天接口 - 非流式输出
-     * @param messages 消息列表
-     * @return AI回复内容
-     */
-    public String createChatCompletion(List<ChatMessage> messages) {
-        try {
-            String url = config.getBaseUrl() + "/v1/chat/completions";
-            
-            // 设置请求头
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBearerAuth(config.getApiKey());
-            
-            // 创建请求体
-            ObjectNode requestBody = objectMapper.createObjectNode();
-            requestBody.put("model", config.getModel());
-            requestBody.put("temperature", config.getTemperature());
-            requestBody.put("max_tokens", config.getMaxTokens());
-            
-            // 添加消息
-            ArrayNode messagesArray = requestBody.putArray("messages");
-            for (ChatMessage message : messages) {
-                ObjectNode messageObject = messagesArray.addObject();
-                messageObject.put("role", message.getRole());
-                messageObject.put("content", message.getContent());
-            }
-            
-            // 发送请求
-            HttpEntity<String> request = new HttpEntity<>(requestBody.toString(), headers);
-            ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-            
-            // 解析响应
-            JsonNode responseBody = objectMapper.readTree(response.getBody());
-            String content = responseBody
-                .path("choices")
-                .path(0)
-                .path("message")
-                .path("content")
-                .asText();
-            
-            return content;
-        } catch (Exception e) {
-            log.error("调用DeepSeek API出错", e);
-            throw new RuntimeException("调用AI服务失败", e);
-        }
-    }
     
     /**
      * 调用DeepSeek的聊天接口 - 流式输出
@@ -179,9 +129,6 @@ public class DeepSeekService {
                 messageObject.put("role", message.getRole());
                 messageObject.put("content", message.getContent());
             }
-            
-            // 发送请求
-            HttpEntity<String> request = new HttpEntity<>(requestBody.toString(), headers);
             
             // 使用自定义ResponseExtractor来处理流式响应
             StringBuilder fullResponse = new StringBuilder();

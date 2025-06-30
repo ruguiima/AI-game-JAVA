@@ -3,9 +3,11 @@ package com.ruguiima.AIGame.controller;
 import com.ruguiima.AIGame.model.dto.StreamRequest;
 import com.ruguiima.AIGame.model.entity.ChatSession;
 import com.ruguiima.AIGame.model.entity.User;
+import com.ruguiima.AIGame.model.vo.StreamResponseVO;
 import com.ruguiima.AIGame.service.ChatSessionService;
+import com.ruguiima.AIGame.service.DeepSeekService;
 import com.ruguiima.AIGame.service.SessionService;
-import com.ruguiima.AIGame.service.impl.DeepSeekService;
+
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -15,9 +17,9 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
 @RestController
@@ -94,24 +96,23 @@ public class ChatApiController {
                     @Override
                     public void onToken(String token) {
                         try {
-                            // 设置正确的SSE数据格式
-                            Map<String, Object> data = new HashMap<>();
-                            data.put("token", token);
-                            data.put("sessionId", finalSessionId);
-                            data.put("done", false);
+                            StreamResponseVO response;
                             
                             // 如果是第一个token，添加会话信息
                             if (isFirstToken) {
                                 ChatSession currentSession = chatSessionService.getSession(finalSessionId);
                                 if (currentSession != null) {
-                                    data.put("sessionName", currentSession.getSessionName());
-                                    data.put("isNewSession", true);
+                                    response = StreamResponseVO.newSessionToken(token, finalSessionId, currentSession.getSessionName());
+                                } else {
+                                    response = StreamResponseVO.token(token, finalSessionId);
                                 }
                                 isFirstToken = false;
+                            } else {
+                                response = StreamResponseVO.token(token, finalSessionId);
                             }
                             
                             // 使用正确的SSE消息格式发送
-                            String jsonData = objectMapper.writeValueAsString(data);
+                            String jsonData = objectMapper.writeValueAsString(response);
                             emitter.send(SseEmitter.event()
                                 .data(jsonData, MediaType.APPLICATION_JSON)
                                 .id(String.valueOf(System.currentTimeMillis()))
@@ -127,15 +128,10 @@ public class ChatApiController {
                     @Override
                     public void onComplete(String fullText) {
                         try {
-                            // 设置正确的SSE数据格式
-                            Map<String, Object> data = new HashMap<>();
-                            data.put("token", "");
-                            data.put("sessionId", finalSessionId);
-                            data.put("done", true);
-                            data.put("fullText", fullText);
+                            StreamResponseVO response = StreamResponseVO.complete(finalSessionId, fullText);
                             
                             // 使用正确的SSE消息格式发送
-                            String jsonData = objectMapper.writeValueAsString(data);
+                            String jsonData = objectMapper.writeValueAsString(response);
                             emitter.send(SseEmitter.event()
                                 .data(jsonData, MediaType.APPLICATION_JSON)
                                 .id(String.valueOf(System.currentTimeMillis()))
