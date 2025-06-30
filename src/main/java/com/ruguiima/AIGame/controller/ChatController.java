@@ -89,8 +89,8 @@ public class ChatController {
             }
         }
 
-        // 获取AI回复
-        String reply = chatService.getMessage(userMessage);
+        // 获取AI回复，传入会话以便处理多轮对话
+        String reply = chatService.getMessage(session, userMessage);
         
         // 将AI回复添加到会话
         if (session.getUser() != null) {
@@ -108,6 +108,11 @@ public class ChatController {
         // 检查用户是否已登录
         if (!sessionService.isLoggedIn(httpSession)) {
             return "redirect:/login";
+        }
+        
+        // 处理特殊情况：如果是新会话路径
+        if ("new".equals(sessionId)) {
+            return newSession(model, httpSession);
         }
         
         User currentUser = sessionService.getCurrentUser(httpSession);
