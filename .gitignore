@@ -61,3 +61,6 @@ Thumbs.db
 *.bak
 *.tmp
 *~
+
+### spectory ###
+.specstory/
