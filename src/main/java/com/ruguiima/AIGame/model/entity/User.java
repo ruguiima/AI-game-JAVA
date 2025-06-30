@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -26,6 +27,19 @@ public class User {
 
     @Column(nullable = false)
     private String password;
+
+    // 个人信息字段
+    @Column(name = "nickname")
+    private String nickname;
+
+    @Column(name = "gender")
+    private String gender; // male, female, other
+
+    @Column(name = "birthday")
+    private LocalDate birthday;
+
+    @Column(name = "avatar_url")
+    private String avatarUrl;
 
     @Column(name = "created_time")
     private LocalDateTime createdTime;

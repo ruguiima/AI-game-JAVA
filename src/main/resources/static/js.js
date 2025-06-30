@@ -418,4 +418,289 @@ document.addEventListener('DOMContentLoaded', function() {
             inputContainer.classList.remove('empty');
         }
     }
+    
+    // 用户头像和个人信息面板控制
+    const userAvatar = document.getElementById('userAvatar');
+    const profileDropdown = document.getElementById('profileDropdown');
+    
+    // 页面加载时获取用户信息
+    loadUserProfile();
+    
+    if (userAvatar && profileDropdown) {
+        // 点击头像显示/隐藏面板
+        userAvatar.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const isVisible = profileDropdown.classList.contains('show');
+            
+            if (isVisible) {
+                hideProfilePanel();
+            } else {
+                showProfilePanel();
+            }
+        });
+        
+        // 显示个人信息面板
+        function showProfilePanel() {
+            profileDropdown.classList.add('show');
+        }
+        
+        // 隐藏个人信息面板
+        function hideProfilePanel() {
+            profileDropdown.classList.remove('show');
+        }
+        
+        // 点击文档其他地方关闭面板
+        document.addEventListener('click', function(e) {
+            // 检查点击的元素是否在用户头像或面板内部
+            if (!userAvatar.contains(e.target) && !profileDropdown.contains(e.target)) {
+                hideProfilePanel();
+            }
+        });
+        
+        // 点击面板内部不关闭（防止事件冒泡）
+        profileDropdown.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+        
+        // ESC键关闭面板
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && profileDropdown.classList.contains('show')) {
+                hideProfilePanel();
+            }
+        });
+    }
+    
+    // 通知系统
+    function showNotification(message, type = 'info') {
+        // 创建通知元素
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.innerHTML = `
+            <span class="notification-message">${message}</span>
+            <button class="notification-close">&times;</button>
+        `;
+        
+        // 添加到页面
+        document.body.appendChild(notification);
+        
+        // 显示动画
+        setTimeout(() => notification.classList.add('show'), 100);
+        
+        // 自动关闭
+        const autoClose = setTimeout(() => removeNotification(notification), 3000);
+        
+        // 手动关闭
+        notification.querySelector('.notification-close').addEventListener('click', () => {
+            clearTimeout(autoClose);
+            removeNotification(notification);
+        });
+        
+        function removeNotification(notificationEl) {
+            notificationEl.classList.remove('show');
+            setTimeout(() => {
+                if (notificationEl.parentNode) {
+                    notificationEl.parentNode.removeChild(notificationEl);
+                }
+            }, 300);
+        }
+    }
+    
+    // 加载用户信息
+    function loadUserProfile() {
+        fetch('/api/user/profile')
+            .then(response => response.json())
+            .then(data => {
+                if (data.username) {
+                    updateUIWithProfile(data);
+                }
+            })
+            .catch(error => {
+                console.error('获取用户信息失败:', error);
+            });
+    }
+    
+    // 更新界面用户信息
+    function updateUIWithProfile(profile) {
+        // 更新昵称
+        const nicknameInput = document.getElementById('nickname');
+        if (nicknameInput && profile.nickname) {
+            nicknameInput.value = profile.nickname;
+        }
+        
+        // 更新性别
+        const genderSelect = document.getElementById('gender');
+        if (genderSelect && profile.gender) {
+            genderSelect.value = profile.gender;
+        }
+        
+        // 更新生日
+        const birthdayInput = document.getElementById('birthday');
+        if (birthdayInput && profile.birthday) {
+            birthdayInput.value = profile.birthday;
+        }
+        
+        // 更新用户名和邮箱（只读）
+        const usernameSpan = document.getElementById('usernameDisplay');
+        if (usernameSpan && profile.username) {
+            usernameSpan.textContent = profile.username;
+        }
+        
+        const emailSpan = document.getElementById('emailDisplay');
+        if (emailSpan && profile.email) {
+            emailSpan.textContent = profile.email;
+        }
+        
+        // 更新头像
+        if (profile.avatarUrl) {
+            updateAvatarDisplay(profile.avatarUrl);
+        }
+    }
+    
+    // 更新头像显示
+    function updateAvatarDisplay(avatarUrl) {
+        const avatarImg = document.querySelector('.avatar-img');
+        const avatarImgLarge = document.querySelector('.avatar-img-large');
+        const avatarText = document.querySelector('.avatar-text');
+        const avatarTextLarge = document.querySelector('.avatar-text-large');
+        
+        if (avatarImg && avatarImgLarge) {
+            avatarImg.src = avatarUrl;
+            avatarImg.style.display = 'block';
+            avatarImgLarge.src = avatarUrl;
+            avatarImgLarge.style.display = 'block';
+            
+            // 隐藏文字头像
+            if (avatarText) avatarText.style.display = 'none';
+            if (avatarTextLarge) avatarTextLarge.style.display = 'none';
+        }
+    }
+    
+    // 头像上传处理
+    const avatarUpload = document.getElementById('avatarUpload');
+    if (avatarUpload) {
+        avatarUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                // 验证文件大小（5MB限制）
+                if (file.size > 5 * 1024 * 1024) {
+                    showNotification('文件大小不能超过5MB', 'error');
+                    return;
+                }
+                
+                // 上传头像
+                uploadAvatar(file);
+            } else {
+                showNotification('请选择有效的图片文件', 'error');
+            }
+        });
+    }
+    
+    // 上传头像到服务器
+    function uploadAvatar(file) {
+        const formData = new FormData();
+        formData.append('avatar', file);
+        
+        // 显示上传中状态
+        showNotification('正在上传头像...', 'info');
+        
+        fetch('/api/user/avatar', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('头像上传成功', 'success');
+                // 更新头像显示
+                if (data.avatarUrl) {
+                    updateAvatarDisplay(data.avatarUrl);
+                }
+            } else {
+                throw new Error(data.message || '上传失败');
+            }
+        })
+        .catch(error => {
+            console.error('头像上传失败:', error);
+            showNotification('头像上传失败: ' + error.message, 'error');
+        });
+    }
+    
+    // 头像上传按钮处理
+    const uploadAvatarBtn = document.getElementById('uploadAvatarBtn');
+    if (uploadAvatarBtn) {
+        uploadAvatarBtn.addEventListener('click', function(e) {
+            e.stopPropagation(); // 防止事件冒泡导致面板关闭
+            document.getElementById('avatarUpload').click();
+        });
+    }
+    
+    // 退出登录处理
+    const logoutBtn = document.querySelector('.logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', function(e) {
+            e.stopPropagation(); // 防止事件冒泡导致面板关闭
+            if (confirm('确定要退出登录吗？')) {
+                // 可以添加退出登录的API调用
+                window.location.href = '/logout';
+            }
+        });
+    }
+    
+    // 保存设置按钮处理
+    const saveBtn = document.querySelector('.save-btn');
+    if (saveBtn) {
+        saveBtn.addEventListener('click', function(e) {
+            e.stopPropagation(); // 防止事件冒泡导致面板关闭
+            
+            // 获取表单数据
+            const nickname = document.getElementById('nickname').value.trim();
+            const gender = document.getElementById('gender').value;
+            const birthday = document.getElementById('birthday').value;
+            
+            // 验证必填字段
+            if (!nickname) {
+                showNotification('请输入昵称', 'error');
+                return;
+            }
+            
+            // 显示保存中状态
+            const originalText = saveBtn.textContent;
+            saveBtn.textContent = '保存中...';
+            saveBtn.disabled = true;
+            
+            // 调用后端API
+            fetch('/api/user/profile', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    nickname: nickname,
+                    gender: gender,
+                    birthday: birthday
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('设置保存成功', 'success');
+                    // 更新界面上的用户信息
+                    if (data.profile) {
+                        updateUIWithProfile(data.profile);
+                    }
+                } else {
+                    throw new Error(data.message || '保存失败');
+                }
+            })
+            .catch(error => {
+                console.error('保存用户信息失败:', error);
+                showNotification('保存失败: ' + error.message, 'error');
+            })
+            .finally(() => {
+                // 恢复按钮状态
+                saveBtn.textContent = originalText;
+                saveBtn.disabled = false;
+            });
+        });
+    }
 });

@@ -43,10 +43,71 @@
             <h1><span style="cursor: pointer;">智能</span>AI助手</h1>
             <p class="subtitle">随时为您解答各种问题</p>
             <div style="position: absolute; top: 10px; right: 20px; display: flex; align-items: center;">
-                <span style="margin-right: 15px;" th:if="${user != null}" th:text="${'欢迎, ' + user.username}"></span>
-                <a href="/logout" style="color: var(--primary-color); text-decoration: none;">
-                    <i class="fas fa-sign-out-alt"></i> 退出
-                </a>
+                <!-- 用户头像和个人信息 -->
+                <div class="user-profile-container" th:if="${user != null}">
+                    <div class="user-avatar" id="userAvatar">
+                        <img th:src="${user.avatarUrl != null ? user.avatarUrl : '/static/images/default-avatar.svg'}" 
+                             alt="用户头像" class="avatar-img" th:style="${user.avatarUrl != null ? 'display: block;' : 'display: none;'}" />
+                        <span class="avatar-text" th:text="${user.username.substring(0,1).toUpperCase()}" 
+                              th:style="${user.avatarUrl != null ? 'display: none;' : 'display: flex;'}"></span>
+                    </div>
+                    
+                    <!-- 个人信息悬浮面板 -->
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <div class="profile-header">
+                            <div class="profile-avatar-large">
+                                <img th:src="${user.avatarUrl != null ? user.avatarUrl : '/static/images/default-avatar.svg'}" 
+                                     alt="用户头像" class="avatar-img-large" th:style="${user.avatarUrl != null ? 'display: block;' : 'display: none;'}" />
+                                <span class="avatar-text-large" th:text="${user.username.substring(0,1).toUpperCase()}" 
+                                      th:style="${user.avatarUrl != null ? 'display: none;' : 'display: flex;'}"></span>
+                            </div>
+                            <div class="profile-info">
+                                <h3 class="profile-username" id="usernameDisplay" th:text="${user.username}">用户名</h3>
+                                <p class="profile-email" id="emailDisplay" th:text="${user.email}">user@example.com</p>
+                            </div>
+                        </div>
+                        
+                        <div class="profile-section">
+                            <h4>个人设置</h4>
+                            <div class="profile-field">
+                                <label>昵称</label>
+                                <input type="text" class="profile-input" id="nickname" 
+                                       th:value="${user.nickname != null ? user.nickname : ''}" 
+                                       placeholder="设置昵称" />
+                            </div>
+                            <div class="profile-field">
+                                <label>性别</label>
+                                <select class="profile-select" id="gender">
+                                    <option value="">请选择</option>
+                                    <option value="male" th:selected="${user.gender == 'male'}">男</option>
+                                    <option value="female" th:selected="${user.gender == 'female'}">女</option>
+                                    <option value="other" th:selected="${user.gender == 'other'}">其他</option>
+                                </select>
+                            </div>
+                            <div class="profile-field">
+                                <label>生日</label>
+                                <input type="date" class="profile-input" id="birthday" 
+                                       th:value="${user.birthday != null ? user.birthday : ''}" />
+                            </div>
+                            <div class="profile-field">
+                                <label>头像</label>
+                                <div class="avatar-upload">
+                                    <input type="file" id="avatarUpload" accept="image/*" style="display: none;" />
+                                    <button type="button" class="upload-btn" id="uploadAvatarBtn">
+                                        <i class="fas fa-camera"></i> 更换头像
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="profile-actions">
+                            <button class="save-btn">保存设置</button>
+                            <button class="logout-btn" onclick="window.location.href='/logout'">
+                                <i class="fas fa-sign-out-alt"></i> 退出登录
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 

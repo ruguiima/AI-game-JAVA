@@ -32,6 +32,13 @@ public class SessionService {
     }
     
     /**
+     * 更新会话中的用户信息
+     */
+    public void setCurrentUser(HttpSession session, User user) {
+        session.setAttribute(USER_SESSION_KEY, user);
+    }
+    
+    /**
      * 退出登录
      */
     public void logout(HttpSession session) {

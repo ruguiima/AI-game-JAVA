@@ -10,4 +10,5 @@ public interface UserService {
     boolean existsByEmail(String email);
     Optional<User> getUserById(Long userId);
     Optional<User> getUserByUsername(String username);
+    User updateUser(User user);
 }
