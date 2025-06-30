@@ -1,6 +1,6 @@
-# AI 聊天应用
+# NEXUS ———— 接入大模型api的定制化聊天应用
 
-一个基于 Spring Boot 的 AI 聊天应用，集成了 DeepSeek API，支持用户注册、登录、聊天会话管理和个性化模型设置。
+NEXUS是一个基于 Spring Boot 的 AI 聊天应用，集成了 DeepSeek API，支持用户注册、登录、聊天会话管理和个性化模型设置。
 
 ## 功能特性
 

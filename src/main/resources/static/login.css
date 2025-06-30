@@ -1,3 +1,109 @@
+/* 导入字体 */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
+/* 登录页面Nexus标题样式 */
+.login-header {
+    position: absolute;
+    top: 12%;
+    right: 15%;
+    text-align: center;
+    z-index: 1000;
+    transform: translateX(30%);
+}
+
+.nexus-title-login {
+    font-family: 'Orbitron', 'Arial Black', sans-serif !important;
+    font-size: 3rem !important;
+    font-weight: 900 !important;
+    background: linear-gradient(135deg, #1a1a1a 0%, #333 50%, #1a1a1a 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    position: relative;
+    transition: all 0.3s ease;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1.1 !important;
+    cursor: pointer;
+}
+
+.nexus-title-login .x-highlight {
+    background: linear-gradient(135deg, #ff6b35 0%, #ff4500 50%, #ff6b35 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+    position: relative;
+    display: inline-block;
+    transform: scale(1.3) !important;
+    filter: drop-shadow(0 0 15px rgba(255, 107, 53, 0.6)) !important;
+}
+
+.nexus-title-login .x-highlight::before {
+    content: '';
+    position: absolute;
+    top: -20%;
+    left: -20%;
+    right: -20%;
+    bottom: -20%;
+    background: radial-gradient(circle, rgba(255, 107, 53, 0.3) 0%, transparent 70%);
+    z-index: -1;
+    border-radius: 50%;
+    animation: pulse-login 2s infinite;
+}
+
+.nexus-title-login:hover {
+    transform: translateY(-3px) !important;
+}
+
+.nexus-title-login:hover .x-highlight {
+    transform: scale(1.4) rotate(8deg) !important;
+    filter: drop-shadow(0 0 25px rgba(255, 107, 53, 0.8)) !important;
+}
+
+.subtitle-login {
+    font-size: 12px;
+    color: #666;
+    margin-top: 8px;
+    font-weight: 300;
+    letter-spacing: 0.05em;
+}
+
+@keyframes pulse-login {
+    0%, 100% { transform: scale(1); opacity: 0.7; }
+    50% { transform: scale(1.1); opacity: 1; }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .login-header {
+        top: 5%;
+        right: 5%;
+    }
+    
+    .nexus-title-login {
+        font-size: 2rem !important;
+    }
+    
+    .subtitle-login {
+        font-size: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .login-header {
+        top: 3%;
+        right: 3%;
+    }
+    
+    .nexus-title-login {
+        font-size: 1.5rem !important;
+    }
+    
+    .subtitle-login {
+        font-size: 9px;
+    }
+}
+
 * {
     padding: 0;
     margin: 0;

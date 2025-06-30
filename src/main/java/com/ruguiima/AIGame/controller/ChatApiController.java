@@ -1,12 +1,12 @@
 package com.ruguiima.AIGame.controller;
 
+import com.ruguiima.AIGame.config.DeepSeekConfig;
 import com.ruguiima.AIGame.model.dto.StreamRequest;
 import com.ruguiima.AIGame.model.entity.ChatSession;
 import com.ruguiima.AIGame.model.entity.User;
 import com.ruguiima.AIGame.model.vo.StreamResponseVO;
 import com.ruguiima.AIGame.service.ChatSessionService;
 import com.ruguiima.AIGame.service.DeepSeekService;
-import com.ruguiima.AIGame.service.ModelSettings;
 import com.ruguiima.AIGame.service.SessionService;
 
 import jakarta.servlet.http.HttpSession;
@@ -39,6 +39,9 @@ public class ChatApiController {
     
     @Autowired
     private DeepSeekService deepSeekService;
+    
+    @Autowired
+    private DeepSeekConfig deepSeekConfig;
     
     /**
      * 处理聊天消息并返回流式响应
@@ -181,24 +184,17 @@ public class ChatApiController {
                 };
                 
                 // 获取用户的模型设置
-                ModelSettings modelSettings;
+                DeepSeekConfig.ModelSettings modelSettings;
                 try {
-                    // 获取用户设置，如果为null则使用默认值
-                    String model = currentUser.getPreferredModel() != null ? 
-                                  currentUser.getPreferredModel() : "deepseek-chat";
-                    Double temperature = currentUser.getTemperature() != null ? 
-                                        currentUser.getTemperature() : 0.2;
-                    Integer maxTokens = currentUser.getMaxTokens() != null ? 
-                                       currentUser.getMaxTokens() : 500;
-                    
-                    modelSettings = ModelSettings.builder()
-                            .model(model)
-                            .temperature(temperature)
-                            .maxTokens(maxTokens)
-                            .build();
+                    // 使用配置类的方法创建用户设置
+                    modelSettings = deepSeekConfig.createUserModelSettings(
+                        currentUser.getPreferredModel(),
+                        currentUser.getTemperature(),
+                        currentUser.getMaxTokens()
+                    );
                 } catch (Exception e) {
                     // 如果获取用户设置失败，使用默认设置
-                    modelSettings = ModelSettings.defaultSettings();
+                    modelSettings = deepSeekConfig.getDefaultModelSettings();
                     log.warn("获取用户模型设置失败，使用默认设置", e);
                 }
                 

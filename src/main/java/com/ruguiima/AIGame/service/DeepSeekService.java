@@ -71,7 +71,7 @@ public class DeepSeekService {
      * @param callback 回调函数
      */
     public void createChatCompletionStream(List<ChatMessage> messages, 
-                                         ModelSettings modelSettings, 
+                                         DeepSeekConfig.ModelSettings modelSettings, 
                                          StreamCallback callback) {
         try {
             String url = config.getBaseUrl() + "/v1/chat/completions";
@@ -176,7 +176,7 @@ public class DeepSeekService {
      * @param callback 回调函数
      */
     public void createChatCompletionStream(ChatSession session, String userMessage, 
-                                         ModelSettings modelSettings, StreamCallback callback) {
+                                         DeepSeekConfig.ModelSettings modelSettings, StreamCallback callback) {
         try {
             // 准备消息列表
             List<ChatMessage> messages = new ArrayList<>();
