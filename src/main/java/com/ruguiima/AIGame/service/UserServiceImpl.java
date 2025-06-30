@@ -38,15 +38,26 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User loginUser(String username, String password) {
-        // 根据用户名查找用户
-        Optional<User> userOptional = userRepository.findByUsername(username);
+    public User loginUser(String usernameOrEmail, String password) {
+        User user = null;
         
-        if (userOptional.isEmpty()) {
-            throw new RuntimeException("用户不存在");
+        // 判断输入的是邮箱还是用户名（简单判断：包含@符号的认为是邮箱）
+        if (usernameOrEmail.contains("@")) {
+            // 按邮箱查找
+            Optional<User> userOptional = userRepository.findByEmail(usernameOrEmail);
+            if (userOptional.isEmpty()) {
+                throw new RuntimeException("邮箱不存在");
+            }
+            user = userOptional.get();
+        } else {
+            // 按用户名查找
+            Optional<User> userOptional = userRepository.findByUsername(usernameOrEmail);
+            if (userOptional.isEmpty()) {
+                throw new RuntimeException("用户名不存在");
+            }
+            user = userOptional.get();
         }
         
-        User user = userOptional.get();
         // 在实际应用中，应该对密码进行匹配而不是直接比较
         if (!user.getPassword().equals(password)) {
             throw new RuntimeException("密码错误");
@@ -75,6 +86,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public Optional<User> getUserByUsername(String username) {
         return userRepository.findByUsername(username);
+    }
+
+    @Override
+    public Optional<User> getUserByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 
     @Override
