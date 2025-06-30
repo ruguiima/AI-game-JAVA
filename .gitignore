@@ -1,7 +1,7 @@
 target/
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+.mvn/wrapper/maven-wrapper.jar
+**/src/main/**/target/
+**/src/test/**/target/
 
 ### STS ###
 .apt_generated
@@ -33,3 +33,31 @@ build/
 
 ### avatar ###
 uploads/
+
+### 环境变量和敏感配置 ###
+.env
+.env.local
+.env.development
+.env.production
+application-local.properties
+application-local.yaml
+application-dev.properties  
+application-dev.yaml
+
+### 日志文件 ###
+*.log
+logs/
+
+### 操作系统文件 ###
+.DS_Store
+Thumbs.db
+
+### 数据库文件 ###
+*.db
+*.sqlite
+*.sqlite3
+
+### 备份文件 ###
+*.bak
+*.tmp
+*~

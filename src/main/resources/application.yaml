@@ -1,6 +1,8 @@
 spring:
   application:
     name: ai-game
+  profiles:
+    active: local
     
   thymeleaf:
     prefix: classpath:/templates/
@@ -10,9 +12,9 @@ spring:
     cache: false
 
   datasource:
-    url: jdbc:mysql://localhost:3306/ai_chatting_web?useSSL=false&serverTimezone=UTC&characterEncoding=utf8
-    username: root
-    password: abc123
+    url: ${DB_URL:jdbc:mysql://localhost:3306/ai_chatting_web?useSSL=false&serverTimezone=UTC&characterEncoding=utf8}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -54,7 +56,7 @@ logging:
 
 # DeepSeek 配置
 deepseek:
-  api-key: sk-ffb34c6927ec49679c0120b3bd1854c6
+  api-key: ${DEEPSEEK_API_KEY}
   base-url: https://api.deepseek.com
   model: deepseek-chat
   max-messages: 10  # 保留最近10条消息以避免token过大
