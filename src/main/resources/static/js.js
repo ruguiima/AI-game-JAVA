@@ -236,6 +236,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                             input.value = currentSessionId;
                                             chatForm.appendChild(input);
                                         }
+                                        
+                                        // 如果是新会话，更新历史侧边栏
+                                        if (data.isNewSession && data.sessionName) {
+                                            updateHistoryPanel(currentSessionId, data.sessionName);
+                                        }
                                     }
                                     
                                     // 如果有token，更新显示
@@ -302,6 +307,51 @@ document.addEventListener('DOMContentLoaded', function() {
         adjustTextareaHeight();
     }
 
+    // 更新历史侧边栏
+    function updateHistoryPanel(sessionId, sessionName) {
+        const historyList = document.getElementById('historyList');
+        if (!historyList || !sessionId) return;
+        
+        // 检查是否已经存在该会话
+        const existingItem = historyList.querySelector(`[data-session-id="${sessionId}"]`);
+        if (existingItem) {
+            // 如果已经存在，更新活动状态
+            const allItems = historyList.querySelectorAll('.history-item');
+            allItems.forEach(item => item.classList.remove('active'));
+            existingItem.classList.add('active');
+            return;
+        }
+        
+        // 创建新的历史记录项
+        const historyItem = document.createElement('div');
+        historyItem.className = 'history-item active';
+        historyItem.setAttribute('data-session-id', sessionId);
+        historyItem.style.cursor = 'pointer';
+        historyItem.onclick = function() {
+            window.location.href = '/session/' + sessionId;
+        };
+        
+        // 获取当前时间
+        const now = new Date();
+        const timeString = now.getFullYear() + '-' + 
+                          String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+                          String(now.getDate()).padStart(2, '0') + ' ' + 
+                          String(now.getHours()).padStart(2, '0') + ':' + 
+                          String(now.getMinutes()).padStart(2, '0');
+        
+        historyItem.innerHTML = `
+            <div class="history-question">${sessionName}</div>
+            <div class="history-time">${timeString}</div>
+        `;
+        
+        // 移除其他项的活动状态
+        const allItems = historyList.querySelectorAll('.history-item');
+        allItems.forEach(item => item.classList.remove('active'));
+        
+        // 将新项添加到列表顶部
+        historyList.insertBefore(historyItem, historyList.firstChild);
+    }
+    
     // 绑定历史面板事件
     if (toggleHistoryBtn) {
         toggleHistoryBtn.addEventListener('click', toggleHistory);

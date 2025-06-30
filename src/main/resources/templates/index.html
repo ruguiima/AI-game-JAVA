@@ -25,7 +25,7 @@
         <div class="history-list" id="historyList">
             <div th:each="chatSession : ${sessions}" 
                  th:classappend="${chatSession.sessionId == currentSessionId} ? 'history-item active' : 'history-item'"
-                 th:attr="onclick='window.location.href=\'/session/\' + \'' + ${chatSession.sessionId} + '\''"
+                 th:attr="onclick='window.location.href=\'/session/\' + \'' + ${chatSession.sessionId} + '\'', data-session-id=${chatSession.sessionId}"
                  style="cursor: pointer;">
                 <div class="history-question" th:text="${chatSession.sessionName}"></div>
                 <div class="history-time" th:text="${#temporals.format(chatSession.lastUpdatedTime, 'yyyy-MM-dd HH:mm')}"></div>

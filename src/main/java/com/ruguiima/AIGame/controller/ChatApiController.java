@@ -89,6 +89,7 @@ public class ChatApiController {
                 // 创建回调函数处理流式输出
                 DeepSeekService.StreamCallback callback = new DeepSeekService.StreamCallback() {
                     private StringBuilder fullResponse = new StringBuilder();
+                    private boolean isFirstToken = true;
 
                     @Override
                     public void onToken(String token) {
@@ -98,6 +99,16 @@ public class ChatApiController {
                             data.put("token", token);
                             data.put("sessionId", finalSessionId);
                             data.put("done", false);
+                            
+                            // 如果是第一个token，添加会话信息
+                            if (isFirstToken) {
+                                ChatSession currentSession = chatSessionService.getSession(finalSessionId);
+                                if (currentSession != null) {
+                                    data.put("sessionName", currentSession.getSessionName());
+                                    data.put("isNewSession", true);
+                                }
+                                isFirstToken = false;
+                            }
                             
                             // 使用正确的SSE消息格式发送
                             String jsonData = objectMapper.writeValueAsString(data);
