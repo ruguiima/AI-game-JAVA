@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI智能助手</title>
     <link rel="stylesheet" th:href="@{/font/css/main.min.css}">
-    <link rel="stylesheet" th:href="@{/css.css}" >
-    <link rel="stylesheet" th:href="@{/streaming.css}" >
+    <link rel="stylesheet" th:href="@{/index.css}" >
 </head>
 <body>
     <!-- 侧边历史记录面板 -->
@@ -18,7 +17,7 @@
             </button>
         </div>
         <div style="padding: 10px;">
-            <button onclick="window.location.href='/session/new'" style="width: 100%; padding: 8px; background-color: var(--primary-color); color: white; border: none; border-radius: 4px; cursor: pointer;">
+            <button onclick="window.location.href='/session/new'" class="onclick">
                 <i class="fas fa-plus"></i> 新建对话
             </button>
         </div>
@@ -235,6 +234,6 @@
         </div>
     </div>
 
-    <script th:src="@{/js.js}"></script>
+    <script th:src="@{/index.js}"></script>
 </body>
 </html>

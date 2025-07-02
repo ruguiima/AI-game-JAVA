@@ -228,7 +228,7 @@
  .typing-dot {
      width: 8px;
      height: 8px;
-     background-color: #aaa;
+     background-color: var(--primary-color);
      border-radius: 50%;
      margin: 0 2px;
      animation: typingAnimation 1.4s infinite ease-in-out;
@@ -249,6 +249,31 @@
  @keyframes typingAnimation {
      0%, 60%, 100% { transform: translateY(0); }
      30% { transform: translateY(-5px); }
+ }
+
+ /* AI消息加载状态 */
+ .ai-message.loading .message-bubble {
+     display: none;
+ }
+
+ .ai-message.loading .typing-indicator {
+     display: inline-flex;
+ }
+
+ .ai-message .typing-indicator {
+     display: none;
+     margin-top: 4px;
+ }
+
+ /* 加载时的闪烁动画 */
+ .ai-message.loading .message-avatar {
+     animation: pulse 1.5s infinite;
+ }
+
+ @keyframes pulse {
+     0% { opacity: 1; }
+     50% { opacity: 0.6; }
+     100% { opacity: 1; }
  }
  
  /* 输入区域 */
@@ -963,4 +988,13 @@
 .reset-settings-btn:hover {
     background: #e9ecef;
     color: #333;
+}
+
+.onclick {
+    width: 100%;
+    padding: 8px; 
+    background-color: var(--primary-color); 
+    color: white; border: none; 
+    border-radius: 4px; 
+    cursor: pointer;
 }

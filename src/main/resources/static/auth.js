@@ -16,15 +16,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
     
-    // 监听表单切换事件的外部函数，可以在其他地方调用
-    window.switchToLogin = function() {
-        document.querySelector('.loginbtn').click();
-    };
-    
-    window.switchToSignup = function() {
-        document.querySelector('.signupbtn').click();
-    };
-    
     // 表单切换监听器
     document.querySelector('.signupbtn').addEventListener('click', function() {
         clearFormAndMessages(loginForm);

@@ -215,29 +215,4 @@ public class ChatApiController {
         
         return emitter;
     }
-    
-    /**
-     * 为流式API提供会话信息的端点
-     */
-    @GetMapping("/session/{sessionId}")
-    public ResponseEntity<?> getSessionInfo(@PathVariable String sessionId, HttpSession httpSession) {
-        // 检查用户是否已登录
-        if (!sessionService.isLoggedIn(httpSession)) {
-            return ResponseEntity.status(401).body(Map.of("error", "未登录"));
-        }
-        
-        User currentUser = sessionService.getCurrentUser(httpSession);
-        ChatSession session = chatSessionService.getSession(sessionId);
-        
-        if (session == null || session.getUser() == null || 
-                !session.getUser().getId().equals(currentUser.getId())) {
-            return ResponseEntity.status(404).body(Map.of("error", "会话不存在或无权访问"));
-        }
-        
-        Map<String, Object> response = new HashMap<>();
-        response.put("sessionId", session.getSessionId());
-        response.put("sessionName", session.getSessionName());
-        
-        return ResponseEntity.ok(response);
-    }
 }
