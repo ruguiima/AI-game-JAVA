@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import com.ruguiima.nexus.model.entity.User;
+
 import java.time.LocalDate;
 
 /**
@@ -23,7 +25,7 @@ public class UserProfileVO {
     private LocalDate birthday;
     private String avatarUrl;
     
-    public static UserProfileVO fromUser(com.ruguiima.nexus.model.entity.User user) {
+    public static UserProfileVO fromUser(User user) {
         UserProfileVO vo = new UserProfileVO();
         vo.setUsername(user.getUsername());
         vo.setEmail(user.getEmail());

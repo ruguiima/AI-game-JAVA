@@ -47,13 +47,13 @@ NEXUS是一个基于 Spring Boot 的 AI 聊天应用，集成了 DeepSeek API，
    在`src/main/resources`下新建`application-local.yaml`配置您自己的数据库信息和`api-key`，如：
    ```yaml
    spring:
-     datasource:
-       url: jdbc:mysql://localhost:3306/ai_chatting_web?useSSL=false&serverTimezone=UTC&characterEncoding=utf8
-       username: root
-       password: your_database_password
+      datasource:
+         url: jdbc:mysql://localhost:3306/ai_chatting_web?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=utf8
+         username: root
+         password: your_database_password
 
-   deepseek:
-     api-key: your_deepseek_api_key_here
+      deepseek:
+         api-key: your_deepseek_api_key_here
    ```
 
 4. **运行应用**
@@ -117,6 +117,7 @@ src/
 │   ├── java/com/ruguiima/nexus/
 │   │   ├── config/          # 配置类
 │   │   ├── controller/      # 控制器
+|   |   ├── converter/       # 转换器
 │   │   ├── model/          # 数据模型
 │   │   │   ├── dto/        # 数据传输对象
 │   │   │   ├── entity/     # 实体类
@@ -129,21 +130,26 @@ src/
 │       └── templates/      # 模板文件
 ```
 
-## API 文档
+## 路由说明
 
 ### 用户相关
 - `POST /api/users/register` - 用户注册
-- `POST /api/users/login` - 用户登录
-- `POST /api/users/logout` - 用户登出
+- `POST /users/login` - 用户登录
+- `GET /users/logout` - 用户登出
 
 ### 聊天相关  
 - `POST /api/chat/stream` - 发送消息（流式响应）
-- `GET /api/sessions/{sessionId}` - 获取聊天会话
-- `GET /api/sessions` - 获取用户的所有会话
+- `GET /sessions/{sessionId}` - 获取聊天会话
+- `GET /sessions` - 获取用户的所有会话
 
 ### 模型设置
 - `GET /api/model-settings` - 获取用户模型设置
 - `POST /api/model-settings` - 更新用户模型设置
+
+### 用户信息相关
+- `GET /api/user/profile` - 获取当前用户信息
+- `POST /api/user/profile` - 更新当前用户信息
+- `POST /api/user/avatar` - 上传用户头像
 
 ## 开发
 
