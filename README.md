@@ -114,7 +114,7 @@ NEXUS是一个基于 Spring Boot 的 AI 聊天应用，集成了 DeepSeek API，
 ```
 src/
 ├── main/
-│   ├── java/com/ruguiima/AIGame/
+│   ├── java/com/ruguiima/nexus/
 │   │   ├── config/          # 配置类
 │   │   ├── controller/      # 控制器
 │   │   ├── model/          # 数据模型
